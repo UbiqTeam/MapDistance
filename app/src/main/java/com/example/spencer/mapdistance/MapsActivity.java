@@ -50,7 +50,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     }
-    
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -65,6 +65,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         clear = findViewById(R.id.clearButton);
         mTextView2.setText("array size: " + markers.size());
         mTextView.setText("Distance in meters: ");
+        mMap.setMapType(mMap.MAP_TYPE_SATELLITE);
+
+        mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(36.057829,-94.176290),18.0f));
+
+
+        mTextView.setTextColor(Color.RED);
+        mTextView2.setTextColor(Color.RED);
+        mTextView3.setTextColor(Color.RED);
+        coordinates.setTextColor(Color.RED);
+
 
 
         mMap.setOnMapClickListener(new OnMapClickListener() {
