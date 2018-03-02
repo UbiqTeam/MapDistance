@@ -107,33 +107,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 markers.add(marker);
 
                 mPolyline = mMap.addPolyline(new PolylineOptions().geodesic(true));
-
                 mTextView2.setText("array size: " + markers.size());
 
                 double lat = marker.getPosition().latitude;
                 double lon = marker.getPosition().longitude;
                 coordinates.setText(lat + " " + lon);
+                if(markers.size() == 1){
+                    mMap.clear();
+                }
 
-                if (markers.size() > 1 && markers.size() < 5){
+                if (markers.size() > 1){
 
                         int distance = (int) SphericalUtil.computeDistanceBetween(markers.get(count).getPosition(),markers.get(count+1).getPosition());
                         distances.add(distance);
-                        //mPolyline.setPoints(Arrays.asList(markers.get(i).getPosition(),markers.get(i+1).getPosition()));
-                        mTextView.setText("Distance in meters: " + distances.get(count));
+                        mTextView.setText("Distance in meters: " + count);
 
                 }
                 if (markers.size() == 4) {
                     int distance = (int) SphericalUtil.computeDistanceBetween(markers.get(3).getPosition(),markers.get(0).getPosition());
                     distances.add(distance);
 
-                     area = mMap.addPolygon(new PolygonOptions().add(markers.get(0).getPosition(),markers.get(1).getPosition(),markers.get(2).getPosition(),
-                                markers.get(3).getPosition()).strokeColor(Color.BLACK));
+                    area = mMap.addPolygon(new PolygonOptions().add(markers.get(0).getPosition(),markers.get(1).getPosition(),markers.get(2).getPosition(),
+                               markers.get(3).getPosition()).strokeColor(Color.BLACK));
                     int i = 0;
-                        mTextView3.setText("lengths: " + distances.get(i) + ", " + distances.get(i+1) + ", " + distances.get(i+2) + ", " + distances.get(i+3) );
-
+                       mTextView3.setText("lengths: " + distances.get(i) + ", " + distances.get(i+1) + ", " + distances.get(i+2) + ", " + distances.get(i+3) );
+                    markers.clear();
+                    distances.clear();
+                    count = -2;
+                }else{
+                    mTextView3.setText("");
                 }
                 mMap.addMarker(markerOptions);
+
                 count++;
+                mTextView.setText("Distance in meters: " + count);
             }
         });
     }
