@@ -11,13 +11,10 @@ import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.location.LocationManager;
-
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -27,18 +24,15 @@ import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.SphericalUtil;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import static android.R.attr.button;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
-    TextView mTextView;
-    TextView mTextView2;
-    TextView mTextView3;
-    TextView coordinates;
+    TextView areaText;
+    TextView markerCountText;
+    TextView lengthsText;
+    TextView coordinatesText;
     Polyline mPolyline;
     Polygon area;
     Button clear;
@@ -57,28 +51,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-
-
-
-
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         final List<Marker> markers = new ArrayList<>();
-        final List<Integer> distances = new ArrayList<>();
+        final List<Double> distances = new ArrayList<>();
+        final List<LatLng> coorList = new ArrayList<>();
 
 
-        mTextView = findViewById(R.id.textView);
-        mTextView2 = findViewById(R.id.textView2);
-        coordinates = findViewById(R.id.coordinates);
-        mTextView3 = findViewById(R.id.textView3);
+        areaText = findViewById(R.id.areaText);
+        markerCountText = findViewById(R.id.markerCountText);
+        coordinatesText = findViewById(R.id.coordinatesText);
+        lengthsText = findViewById(R.id.lengthsText);
         clear = findViewById(R.id.clearButton);
         drop = findViewById(R.id.drop);
-        mTextView2.setText("array size: " + markers.size());
-        mTextView.setText("Distance in meters: ");
+        markerCountText.setText("array size: " + markers.size());
+        areaText.setText("Area (square meters): ");
         mMap.setMapType(mMap.MAP_TYPE_SATELLITE);
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -87,16 +77,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             mMap.setMyLocationEnabled(true);
         } else {
-            mTextView2.setText("no GPS permission");
+            markerCountText.setText("no GPS permission");
         }
 
         mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLongitude()),18.0f));
 
 
-        mTextView.setTextColor(Color.RED);
-        mTextView2.setTextColor(Color.RED);
-        mTextView3.setTextColor(Color.RED);
-        coordinates.setTextColor(Color.RED);
+        areaText.setTextColor(Color.RED);
+        markerCountText.setTextColor(Color.RED);
+        lengthsText.setTextColor(Color.RED);
+        coordinatesText.setTextColor(Color.RED);
 
 
 
@@ -104,7 +94,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
             int count = -1;
-            int totalDistance = 0;
+            double totalArea = 1.0;
 
 
 
@@ -116,13 +106,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     public void onClick(View v){
                         mMap.clear();
                         markers.clear();
-                        mTextView2.setText("array size: " + markers.size());
-                        mTextView.setText("Distance in meters: ");
-                        mTextView3.setText("lengths: ");
-                        coordinates.setText(" ");
+                        markerCountText.setText("Marker Count: " + markers.size());
+                        areaText.setText("Area (square meters): ");
+                        lengthsText.setText(" ");
+                        coordinatesText.setText(" ");
                         distances.clear();
+                        coorList.clear();
                         count = -1;
-                        totalDistance = 0;
+                        totalArea = 1;
                     }
                 });
 
@@ -132,10 +123,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 try {
                                                     location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                                                 }catch (SecurityException e){
-                                                    mTextView2.setText("no GPS permission");
+                                                    markerCountText.setText("no GPS permission");
                                                 }
                                                 LatLng newLatLng = new LatLng(location.getLatitude(),location.getLongitude());
                                                 markerOptions.position(newLatLng);
+                                                coorList.add(newLatLng);
 
 
                                                 Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(),location.getLongitude())).draggable(true));
@@ -143,38 +135,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 markers.add(marker);
 
                                                 mPolyline = mMap.addPolyline(new PolylineOptions().geodesic(true));
-                                                mTextView2.setText("array size: " + markers.size());
+                                                markerCountText.setText("Marker Count: " + markers.size());
 
                                                 double lat = marker.getPosition().latitude;
                                                 double lon = marker.getPosition().longitude;
-                                                coordinates.setText(lat + " " + lon);
+                                                coordinatesText.setText(coorList.toString());
+                                                //coordinatesText.setText(lat + ", " + lon);
                                                 if(markers.size() == 1){
                                                     mMap.clear();
-                                                    totalDistance = 0;
+                                                    totalArea = 1;
                                                 }
 
                                                 if (markers.size() > 1){
 
-                                                    int distance = (int) SphericalUtil.computeDistanceBetween(markers.get(count).getPosition(),markers.get(count+1).getPosition());
-                                                    totalDistance += distance;
+                                                    double distance = SphericalUtil.computeDistanceBetween(markers.get(count).getPosition(),markers.get(count+1).getPosition());
+                                                    totalArea *= distance;
                                                     distances.add(distance);
-                                                    mTextView.setText("Distance in meters: " + totalDistance );
+                                                    areaText.setText("Area (square meters): " + area );
 
                                                 }
                                                 if (markers.size() == 4) {
-                                                    int distance = (int) SphericalUtil.computeDistanceBetween(markers.get(3).getPosition(),markers.get(0).getPosition());
+                                                    double distance = SphericalUtil.computeDistanceBetween(markers.get(3).getPosition(),markers.get(0).getPosition());
                                                     distances.add(distance);
-                                                    totalDistance += distance;
+                                                    totalArea *= distance;
                                                     area = mMap.addPolygon(new PolygonOptions().add(markers.get(0).getPosition(),markers.get(1).getPosition(),markers.get(2).getPosition(),
                                                             markers.get(3).getPosition()).strokeColor(Color.BLACK));
                                                     int i = 0;
-                                                    mTextView3.setText("lengths: " + distances.get(i) + ", " + distances.get(i+1) + ", " + distances.get(i+2) + ", " + distances.get(i+3) );
+                                                    lengthsText.setText("lengths: " + distances.get(i) + ", " + distances.get(i+1) + ", " + distances.get(i+2) + ", " + distances.get(i+3) );
                                                     markers.clear();
                                                     distances.clear();
+                                                    coorList.clear();
                                                     count = -2;
-                                                    mTextView.setText("Distance in meters: " + totalDistance );
+                                                    areaText.setText("Area (square meters): " + totalArea );
                                                 }else{
-                                                    mTextView3.setText("");
+                                                    lengthsText.setText("");
                                                 }
                                                 mMap.addMarker(markerOptions);
                                                 count++;
