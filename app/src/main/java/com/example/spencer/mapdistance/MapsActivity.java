@@ -1,13 +1,17 @@
 package com.example.spencer.mapdistance;
 
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.location.Location;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.location.LocationManager;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -38,7 +42,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Polyline mPolyline;
     Polygon area;
     Button clear;
+    Button drop;
     private GoogleMap mMap;
+
+    LocationManager locationManager;
+    Location location;
 
 
     @Override
@@ -49,6 +57,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
+
 
 
     }
@@ -65,11 +76,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         coordinates = findViewById(R.id.coordinates);
         mTextView3 = findViewById(R.id.textView3);
         clear = findViewById(R.id.clearButton);
+        drop = findViewById(R.id.drop);
         mTextView2.setText("array size: " + markers.size());
         mTextView.setText("Distance in meters: ");
         mMap.setMapType(mMap.MAP_TYPE_SATELLITE);
 
-        mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(36.057829,-94.176290),18.0f));
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
+            location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            mMap.setMyLocationEnabled(true);
+        } else {
+            mTextView2.setText("no GPS permission");
+        }
+
+        mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLongitude()),18.0f));
 
 
         mTextView.setTextColor(Color.RED);
@@ -83,6 +104,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
             int count = -1;
+            int totalDistance = 0;
+
+
 
             @Override
             public void onMapClick(LatLng latLng) {
@@ -98,15 +122,72 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         coordinates.setText(" ");
                         distances.clear();
                         count = -1;
+                        totalDistance = 0;
                     }
                 });
 
+                drop.setOnClickListener(new View.OnClickListener() {
+                                            public void onClick(View view) {
+                                                MarkerOptions markerOptions = new MarkerOptions();
+                                                try {
+                                                    location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                                                }catch (SecurityException e){
+                                                    mTextView2.setText("no GPS permission");
+                                                }
+                                                LatLng newLatLng = new LatLng(location.getLatitude(),location.getLongitude());
+                                                markerOptions.position(newLatLng);
+
+
+                                                Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(),location.getLongitude())).draggable(true));
+
+                                                markers.add(marker);
+
+                                                mPolyline = mMap.addPolyline(new PolylineOptions().geodesic(true));
+                                                mTextView2.setText("array size: " + markers.size());
+
+                                                double lat = marker.getPosition().latitude;
+                                                double lon = marker.getPosition().longitude;
+                                                coordinates.setText(lat + " " + lon);
+                                                if(markers.size() == 1){
+                                                    mMap.clear();
+                                                    totalDistance = 0;
+                                                }
+
+                                                if (markers.size() > 1){
+
+                                                    int distance = (int) SphericalUtil.computeDistanceBetween(markers.get(count).getPosition(),markers.get(count+1).getPosition());
+                                                    totalDistance += distance;
+                                                    distances.add(distance);
+                                                    mTextView.setText("Distance in meters: " + totalDistance );
+
+                                                }
+                                                if (markers.size() == 4) {
+                                                    int distance = (int) SphericalUtil.computeDistanceBetween(markers.get(3).getPosition(),markers.get(0).getPosition());
+                                                    distances.add(distance);
+                                                    totalDistance += distance;
+                                                    area = mMap.addPolygon(new PolygonOptions().add(markers.get(0).getPosition(),markers.get(1).getPosition(),markers.get(2).getPosition(),
+                                                            markers.get(3).getPosition()).strokeColor(Color.BLACK));
+                                                    int i = 0;
+                                                    mTextView3.setText("lengths: " + distances.get(i) + ", " + distances.get(i+1) + ", " + distances.get(i+2) + ", " + distances.get(i+3) );
+                                                    markers.clear();
+                                                    distances.clear();
+                                                    count = -2;
+                                                    mTextView.setText("Distance in meters: " + totalDistance );
+                                                }else{
+                                                    mTextView3.setText("");
+                                                }
+                                                mMap.addMarker(markerOptions);
+                                                count++;
+                                            }
+                                        }
+
+                );
+/*
                 MarkerOptions markerOptions = new MarkerOptions();
                 markerOptions.position(latLng);
-                //markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon));
                 markerOptions.title(latLng.latitude + " : " + latLng.longitude);
 
-                Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(latLng.latitude,latLng.longitude)));
+                Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(latLng.latitude,latLng.longitude)).draggable(true));
                 markers.add(marker);
 
                 mPolyline = mMap.addPolyline(new PolylineOptions().geodesic(true));
@@ -117,19 +198,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 coordinates.setText(lat + " " + lon);
                 if(markers.size() == 1){
                     mMap.clear();
+                    totalDistance = 0;
                 }
 
                 if (markers.size() > 1){
 
-                        int distance = (int) SphericalUtil.computeDistanceBetween(markers.get(count).getPosition(),markers.get(count+1).getPosition());
-                        distances.add(distance);
-                        mTextView.setText("Distance in meters: " + count);
+                    int distance = (int) SphericalUtil.computeDistanceBetween(markers.get(count).getPosition(),markers.get(count+1).getPosition());
+                    totalDistance += distance;
+                    distances.add(distance);
+                    mTextView.setText("Distance in meters: " + totalDistance );
 
                 }
                 if (markers.size() == 4) {
                     int distance = (int) SphericalUtil.computeDistanceBetween(markers.get(3).getPosition(),markers.get(0).getPosition());
                     distances.add(distance);
-
+                    totalDistance += distance;
                     area = mMap.addPolygon(new PolygonOptions().add(markers.get(0).getPosition(),markers.get(1).getPosition(),markers.get(2).getPosition(),
                                markers.get(3).getPosition()).strokeColor(Color.BLACK));
                     int i = 0;
@@ -137,14 +220,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     markers.clear();
                     distances.clear();
                     count = -2;
+                    mTextView.setText("Distance in meters: " + totalDistance );
                 }else{
                     mTextView3.setText("");
                 }
                 mMap.addMarker(markerOptions);
-
-                count++;
-                mTextView.setText("Distance in meters: " + count);
+                count++;*/
             }
         });
+
     }
+
 }
