@@ -78,21 +78,31 @@
         style="@android:style/Widget.Button.Inset"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/modeSwitch"
+        android:layout_alignBottom="@+id/modeSwitch"
         android:text="Drop Marker"
-        android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@+id/clearButton"
-        android:layout_toStartOf="@+id/clearButton" />
+        android:visibility="visible" />
+
+    <Button
+        android:id="@+id/setMarkerButton"
+        style="@android:style/Widget.Button.Inset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/modeSwitch"
+        android:layout_alignBottom="@+id/modeSwitch"
+        android:text="Lock Marker"
+        android:visibility="gone" />
 
     <Switch
         android:id="@+id/modeSwitch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/drop"
-        android:layout_alignBottom="@+id/drop"
-        android:layout_marginEnd="24dp"
-        android:layout_marginRight="24dp"
-        android:layout_toLeftOf="@+id/drop"
         android:switchTextAppearance="@style/TextAppearance.AppCompat.Widget.Button"
-        android:text="GPS Mode" />
+        android:text="GPS Mode"
+        android:layout_alignBaseline="@+id/clearButton"
+        android:layout_alignBottom="@+id/clearButton"
+        android:layout_centerHorizontal="true" />
+
+
 
 </RelativeLayout>
