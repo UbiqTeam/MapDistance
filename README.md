@@ -17,4 +17,4 @@
 
 ### Limitations
 
-Currently only works with four markers forming a quadrilateral. If a fifth marker is placed, the previously outlined quadrilateral will be deleted. 
+Currently only works with four markers forming a quadrilateral. If a fifth marker is placed, then the previously outlined quadrilateral will be deleted. 
