@@ -26,6 +26,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.SphericalUtil;
 import java.util.ArrayList;
 import java.util.List;
+import java.math.BigDecimal;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -41,6 +42,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     LocationManager locationManager;
     Location location;
+
+    public double computeArea(List<Double> distances){
+        BigDecimal tmp = new BigDecimal(0);
+        BigDecimal TWO = new BigDecimal(2);
+
+        double a = distances.get(0);
+        double b = distances.get(1);
+        double c = distances.get(2);
+        double d = distances.get(3);
+
+        for ( Double val : distances){
+            tmp = tmp.add(new BigDecimal(val.intValue()));
+        }
+
+        double s = tmp.divide(TWO).doubleValue();
+
+        return Math.sqrt((s-a)*(s-b)*(s-c)*(s-d));
+    }
 
 
     @Override
@@ -67,8 +86,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         lengthsText = findViewById(R.id.lengthsText);
         clear = findViewById(R.id.clearButton);
         drop = findViewById(R.id.drop);
-        markerCountText.setText("array size: " + markers.size());
-        areaText.setText("Area (square meters): ");
+        markerCountText.setText("Marker Count: " + markers.size());
+        areaText.setText("Area (sq m): ");
         mMap.setMapType(mMap.MAP_TYPE_SATELLITE);
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -93,29 +112,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setOnMapClickListener(new OnMapClickListener() {
 
 
-            int count = -1;
-            double totalArea = 1.0;
+                                       int count = -1;
+                                       double totalArea = 1.0;
 
 
+                                       @Override
+                                       public void onMapClick(LatLng latLng) {
 
-            @Override
-            public void onMapClick(LatLng latLng) {
 
-
-                clear.setOnClickListener(new View.OnClickListener(){
-                    public void onClick(View v){
-                        mMap.clear();
-                        markers.clear();
-                        markerCountText.setText("Marker Count: " + markers.size());
-                        areaText.setText("Area (square meters): ");
-                        lengthsText.setText(" ");
-                        coordinatesText.setText(" ");
-                        distances.clear();
-                        coorList.clear();
-                        count = -1;
-                        totalArea = 1;
-                    }
-                });
+                                           clear.setOnClickListener(new View.OnClickListener() {
+                                               public void onClick(View v) {
+                                                   mMap.clear();
+                                                   markers.clear();
+                                                   markerCountText.setText("Marker Count: " + markers.size());
+                                                   areaText.setText("Area (sq m): ");
+                                                   lengthsText.setText(" ");
+                                                   coordinatesText.setText(" ");
+                                                   distances.clear();
+                                                   coorList.clear();
+                                                   count = -1;
+                                                   totalArea = 1;
+                                               }
+                                           });
 
                 drop.setOnClickListener(new View.OnClickListener() {
                                             public void onClick(View view) {
@@ -134,94 +152,88 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                                                 markers.add(marker);
 
-                                                mPolyline = mMap.addPolyline(new PolylineOptions().geodesic(true));
-                                                markerCountText.setText("Marker Count: " + markers.size());
+                                           mPolyline = mMap.addPolyline(new PolylineOptions().geodesic(true));
+                                           markerCountText.setText("Marker Count: " + markers.size());
+                                           coordinatesText.setText(coorList.toString());
 
-                                                double lat = marker.getPosition().latitude;
-                                                double lon = marker.getPosition().longitude;
-                                                coordinatesText.setText(coorList.toString());
-                                                //coordinatesText.setText(lat + ", " + lon);
-                                                if(markers.size() == 1){
-                                                    mMap.clear();
-                                                    totalArea = 1;
-                                                }
+                                           if (markers.size() == 1) {
+                                               mMap.clear();
+                                           }
 
-                                                if (markers.size() > 1){
+                                           if (markers.size() > 1) {
 
-                                                    double distance = SphericalUtil.computeDistanceBetween(markers.get(count).getPosition(),markers.get(count+1).getPosition());
-                                                    totalArea *= distance;
-                                                    distances.add(distance);
-                                                    areaText.setText("Area (square meters): " + area );
+                                               double distance = SphericalUtil.computeDistanceBetween(markers.get(count).getPosition(), markers.get(count + 1).getPosition());
+                                               distances.add(distance);
+                                               areaText.setText("Area (sq m): " + totalArea);
 
-                                                }
-                                                if (markers.size() == 4) {
-                                                    double distance = SphericalUtil.computeDistanceBetween(markers.get(3).getPosition(),markers.get(0).getPosition());
-                                                    distances.add(distance);
-                                                    totalArea *= distance;
-                                                    area = mMap.addPolygon(new PolygonOptions().add(markers.get(0).getPosition(),markers.get(1).getPosition(),markers.get(2).getPosition(),
-                                                            markers.get(3).getPosition()).strokeColor(Color.BLACK));
-                                                    int i = 0;
-                                                    lengthsText.setText("lengths: " + distances.get(i) + ", " + distances.get(i+1) + ", " + distances.get(i+2) + ", " + distances.get(i+3) );
-                                                    markers.clear();
-                                                    distances.clear();
-                                                    coorList.clear();
-                                                    count = -2;
-                                                    areaText.setText("Area (square meters): " + totalArea );
-                                                }else{
-                                                    lengthsText.setText("");
-                                                }
-                                                mMap.addMarker(markerOptions);
-                                                count++;
+                                           }
+                                           if (markers.size() == 4) {
+                                               double distance = SphericalUtil.computeDistanceBetween(markers.get(3).getPosition(), markers.get(0).getPosition());
+                                               distances.add(distance);
+                                               area = mMap.addPolygon(new PolygonOptions().add(markers.get(0).getPosition(), markers.get(1).getPosition(), markers.get(2).getPosition(),
+                                                       markers.get(3).getPosition()).strokeColor(Color.BLACK));
+                                               int i = 0;
+                                               lengthsText.setText("lengths: " + distances.get(i) + ", " + distances.get(i + 1) + ", " + distances.get(i + 2) + ", " + distances.get(i + 3));
+                                               markers.clear();
+                                               totalArea = computeArea(distances);
+                                               distances.clear();
+                                               coorList.clear();
+                                               count = -2;
+                                              areaText.setText("Area (sq m): " + totalArea);
+                                               markerCountText.setText("Acres: " + totalArea*.000247105);
+                                           } else {
+                                               lengthsText.setText("");
+                                           }
+                                           mMap.addMarker(markerOptions);
+                                           count++;
                                             }
                                         }
 
-                );
-/*
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(latLng);
-                markerOptions.title(latLng.latitude + " : " + latLng.longitude);
+                );/*
 
-                Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(latLng.latitude,latLng.longitude)).draggable(true));
-                markers.add(marker);
+                                           MarkerOptions markerOptions = new MarkerOptions();
+                                           markerOptions.position(latLng);
+                                           markerOptions.title(latLng.latitude + " : " + latLng.longitude);
 
-                mPolyline = mMap.addPolyline(new PolylineOptions().geodesic(true));
-                mTextView2.setText("array size: " + markers.size());
+                                           Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(latLng.latitude, latLng.longitude)).draggable(true));
+                                           markers.add(marker);
 
-                double lat = marker.getPosition().latitude;
-                double lon = marker.getPosition().longitude;
-                coordinates.setText(lat + " " + lon);
-                if(markers.size() == 1){
-                    mMap.clear();
-                    totalDistance = 0;
-                }
+                                           mPolyline = mMap.addPolyline(new PolylineOptions().geodesic(true));
+                                           markerCountText.setText("Marker Count: " + markers.size());
+                                           coordinatesText.setText(coorList.toString());
 
-                if (markers.size() > 1){
+                                           if (markers.size() == 1) {
+                                               mMap.clear();
+                                           }
 
-                    int distance = (int) SphericalUtil.computeDistanceBetween(markers.get(count).getPosition(),markers.get(count+1).getPosition());
-                    totalDistance += distance;
-                    distances.add(distance);
-                    mTextView.setText("Distance in meters: " + totalDistance );
+                                           if (markers.size() > 1) {
 
-                }
-                if (markers.size() == 4) {
-                    int distance = (int) SphericalUtil.computeDistanceBetween(markers.get(3).getPosition(),markers.get(0).getPosition());
-                    distances.add(distance);
-                    totalDistance += distance;
-                    area = mMap.addPolygon(new PolygonOptions().add(markers.get(0).getPosition(),markers.get(1).getPosition(),markers.get(2).getPosition(),
-                               markers.get(3).getPosition()).strokeColor(Color.BLACK));
-                    int i = 0;
-                       mTextView3.setText("lengths: " + distances.get(i) + ", " + distances.get(i+1) + ", " + distances.get(i+2) + ", " + distances.get(i+3) );
-                    markers.clear();
-                    distances.clear();
-                    count = -2;
-                    mTextView.setText("Distance in meters: " + totalDistance );
-                }else{
-                    mTextView3.setText("");
-                }
-                mMap.addMarker(markerOptions);
-                count++;*/
-            }
-        });
+                                               double distance = SphericalUtil.computeDistanceBetween(markers.get(count).getPosition(), markers.get(count + 1).getPosition());
+                                               distances.add(distance);
+                                               areaText.setText("Area (sq m): " + totalArea);
+
+                                           }
+                                           if (markers.size() == 4) {
+                                               double distance = SphericalUtil.computeDistanceBetween(markers.get(3).getPosition(), markers.get(0).getPosition());
+                                               distances.add(distance);
+                                               area = mMap.addPolygon(new PolygonOptions().add(markers.get(0).getPosition(), markers.get(1).getPosition(), markers.get(2).getPosition(),
+                                                       markers.get(3).getPosition()).strokeColor(Color.BLACK));
+                                               int i = 0;
+                                               lengthsText.setText("lengths: " + distances.get(i) + ", " + distances.get(i + 1) + ", " + distances.get(i + 2) + ", " + distances.get(i + 3));
+                                               markers.clear();
+                                               totalArea = computeArea(distances);
+                                               distances.clear();
+                                               coorList.clear();
+                                               count = -2;
+                                              areaText.setText("Area (sq m): " + totalArea);
+                                           } else {
+                                               lengthsText.setText("");
+                                           }
+                                           mMap.addMarker(markerOptions);
+                                           count++;*/
+                                       }
+                                   }
+        );
 
     }
 
