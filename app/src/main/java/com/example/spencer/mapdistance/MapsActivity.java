@@ -55,16 +55,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     double totalArea = 1.0;
     Boolean switchState = true;
 
-    public void setMarkers(List<MarkerOptions> markerOptionsList, List<Marker> markers) {
-
-        for (int i = 0; i < markers.size(); i++) {
-            handleMarkers(markerOptionsList.get(i), markers.get(i));
-        }
-
-        //area = mMap.addPolygon(new PolygonOptions().add(markers.get(0).getPosition(), markers.get(1).getPosition(), markers.get(2).getPosition(),
-        //         markers.get(3).getPosition()).strokeColor(Color.BLACK));
-    }
-
     public void handleMarkers(MarkerOptions markerOptions, Marker marker) {
 
         markers.add(marker);
@@ -216,12 +206,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
             mMap.setOnMapClickListener(new OnMapClickListener() {
-                int count = 0;
                 Boolean button = false;
                 Marker marker = null;
 
                 @Override
-                public void onMapClick(LatLng latLng) {
+                public void onMapClick(final LatLng latLng) {
                     if (mode.isChecked()) {
                         final List<Marker> tmpMarkers = new ArrayList<>();
                         final MarkerOptions markerOptions = new MarkerOptions();
@@ -254,23 +243,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             }
                         });
 
-                        //coorList.add(latLng);
 
-                        //Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(latLng.latitude, latLng.longitude)).draggable(true));
-                        //handleMarkers(markerOptions, marker);
+
                         setMarker.setOnClickListener(new View.OnClickListener() {
                             public void onClick(View view) {
-                                count = 0;
-                                //setMarkers(markerOptionsList, tmpMarkers);
                                 tmpMarkers.add(marker);
                                 markerOptionsList.add(markerOptions);
-                                if(button)
-                                    handleMarkers(markerOptions,marker);
+                                LatLng tmp = markerOptions.getPosition();
+                                coorList.add(tmp);
+                                if(button) {
+                                    handleMarkers(markerOptions, marker);
+
+                                }
                                button = false;
                             }
                         });
                     }
-                    count++;
                 }
             });
     }
