@@ -211,53 +211,55 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 @Override
                 public void onMapClick(final LatLng latLng) {
-                    if (mode.isChecked()) {
-                        final List<Marker> tmpMarkers = new ArrayList<>();
-                        final MarkerOptions markerOptions = new MarkerOptions();
+                    if(!button) {
+                        if (mode.isChecked()) {
+                            final List<Marker> tmpMarkers = new ArrayList<>();
+                            final MarkerOptions markerOptions = new MarkerOptions();
 
-                        if(!button) {
-                            markerOptions.position(latLng);
-                            marker = mMap.addMarker(new MarkerOptions().position(new LatLng(latLng.latitude, latLng.longitude)).draggable(true));
-                            button = true;
-                        }
-
-
-                        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
-                            @Override
-                            public void onMarkerDragStart(Marker marker) {
-
+                            if (!button) {
+                                markerOptions.position(latLng);
+                                marker = mMap.addMarker(new MarkerOptions().position(new LatLng(latLng.latitude, latLng.longitude)).draggable(true));
+                                button = true;
                             }
 
-                            @SuppressWarnings("unchecked")
-                            @Override
-                            public void onMarkerDragEnd(Marker arg0) {
 
-                                marker = mMap.addMarker(new MarkerOptions().position(new LatLng(arg0.getPosition().latitude, arg0.getPosition().longitude)).draggable(true));
-                                LatLng newLatLng = new LatLng(arg0.getPosition().latitude,arg0.getPosition().longitude);
-                                markerOptions.position(newLatLng);
+                            mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+                                @Override
+                                public void onMarkerDragStart(Marker marker) {
+                                    button = false;
+                                }
 
-                            }
+                                @SuppressWarnings("unchecked")
+                                @Override
+                                public void onMarkerDragEnd(Marker arg0) {
 
-                            @Override
-                            public void onMarkerDrag(Marker arg0) {
-                            }
-                        });
-
-
-
-                        setMarker.setOnClickListener(new View.OnClickListener() {
-                            public void onClick(View view) {
-                                tmpMarkers.add(marker);
-                                markerOptionsList.add(markerOptions);
-                                LatLng tmp = markerOptions.getPosition();
-                                coorList.add(tmp);
-                                if(button) {
-                                    handleMarkers(markerOptions, marker);
+                                    marker = mMap.addMarker(new MarkerOptions().position(new LatLng(arg0.getPosition().latitude, arg0.getPosition().longitude)).draggable(true));
+                                    LatLng newLatLng = new LatLng(arg0.getPosition().latitude, arg0.getPosition().longitude);
+                                    markerOptions.position(newLatLng);
+                                    button = true;
 
                                 }
-                               button = false;
-                            }
-                        });
+
+                                @Override
+                                public void onMarkerDrag(Marker arg0) {
+                                }
+                            });
+
+
+                            setMarker.setOnClickListener(new View.OnClickListener() {
+                                public void onClick(View view) {
+                                    tmpMarkers.add(marker);
+                                    markerOptionsList.add(markerOptions);
+                                    LatLng tmp = markerOptions.getPosition();
+                                    coorList.add(tmp);
+                                    if (button) {
+                                        handleMarkers(markerOptions, marker);
+
+                                    }
+                                    button = false;
+                                }
+                            });
+                        }
                     }
                 }
             });
