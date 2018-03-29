@@ -1,4 +1,5 @@
 # MapDistance - Android App
+If app crashes on startup, then be sure that app permissions for storage and location are set to allowed.
 
 ### Two modes:
 
@@ -18,3 +19,7 @@
 ### Limitations
 
 Currently only works with four markers forming a quadrilateral. If a fifth marker is placed, then the previously outlined quadrilateral will be deleted. 
+
+### Permissions
+
+Allow storage and location in app permissions.
