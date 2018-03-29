@@ -66,31 +66,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.clear();
         }
 
-        if (markers.size() > 1) {
-            double distance = SphericalUtil.computeDistanceBetween(markers.get(count).getPosition(), markers.get(count + 1).getPosition());
-            distances.add(distance);
-            areaText.setText("Area (sq m): " + totalArea);
-        }
-
         if (markers.size() == 4) {
-            double distance = SphericalUtil.computeDistanceBetween(markers.get(3).getPosition(), markers.get(0).getPosition());
+            for(int i = 0; i < markers.size()-1; i++ ){
+                double distance = SphericalUtil.computeDistanceBetween(markers.get(i).getPosition(), markers.get(i+1).getPosition());  //for markers 1-4 find distance & area
+                distances.add(distance);
+            }
+            double distance = SphericalUtil.computeDistanceBetween(markers.get(3).getPosition(), markers.get(0).getPosition());     //distance between 1 and 4
             distances.add(distance);
             area = mMap.addPolygon(new PolygonOptions().add(markers.get(0).getPosition(), markers.get(1).getPosition(), markers.get(2).getPosition(),
                     markers.get(3).getPosition()).strokeColor(Color.BLACK));
-            int i = 0;
-            lengthsText.setText("lengths: " + distances.get(i) + ", " + distances.get(i + 1) + ", " + distances.get(i + 2) + ", " + distances.get(i + 3));
+
+            lengthsText.setText("lengths: " + distances.get(0) + ", " + distances.get(1) + ", " + distances.get(2) + ", " + distances.get(3));
             markers.clear();                                                                //clear markers from list
             totalArea = computeArea(distances);                                             //computer area based on distances list
             distances.clear();                                                              //clear distances list
             coorList.clear();                                                               //clear coordinates list
-            count = -2;                                                                     //initialize count
             areaText.setText("Area (sq m): " + totalArea);
         } else {
             lengthsText.setText("");
         }
 
         mMap.addMarker(markerOptions);                                                      //add marker through markerOptions to map
-        count++;
     }
 
     public double computeArea(List<Double> distances) {
@@ -178,7 +174,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 coordinatesText.setText(" ");
                 distances.clear();
                 coorList.clear();
-                count = -1;
                 totalArea = 1;
                 switchState = mode.isChecked();
             }
