@@ -51,9 +51,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     final List<Double> distances = new ArrayList<>();                   //list of distances between markers in meters
     final List<LatLng> coorList = new ArrayList<>();                    //list of marker coordinates
 
-    int count = -1;
     double totalArea = 1.0;
     Boolean switchState = true;
+    Marker marker = null;
 
     public void handleMarkers(MarkerOptions markerOptions, Marker marker) {             //handles distance between markers, line drawing, and adds marker to the map
 
@@ -106,21 +106,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return Math.sqrt((s - a) * (s - b) * (s - c) * (s - d));
     }
 
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
-        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
+    void setupMap(){
         areaText = findViewById(R.id.areaText);
         markerCountText = findViewById(R.id.markerCountText);
         coordinatesText = findViewById(R.id.coordinatesText);
@@ -142,7 +128,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             markerCountText.setText("no GPS permission");
         }
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));     //move camera to current GPS location
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));  //move camera to current GPS location
 
         areaText.setTextColor(Color.RED);
         markerCountText.setTextColor(Color.RED);
@@ -150,6 +136,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         coordinatesText.setTextColor(Color.RED);
         mode.setTextColor(Color.BLACK);
         mode.setBackgroundColor(Color.LTGRAY);
+    }
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_maps);
+        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        final MarkerOptions markerOptions = new MarkerOptions();
+
+        setupMap();
 
         mode.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -176,26 +181,66 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 coorList.clear();
                 totalArea = 1;
                 switchState = mode.isChecked();
+                if (!mode.isChecked()) {
+                    drop.setVisibility(View.VISIBLE);          //clear in GPS mode reverts lock to drop
+                    setMarker.setVisibility(View.GONE);
+                }
             }
         });
 
         //////////////////////// GPS Mode ///////////////////////////////////
 
-        drop.setOnClickListener(new View.OnClickListener() {
+        drop.setOnClickListener(new View.OnClickListener() {                    //drop GPS marker
+
             public void onClick(View view) {
                 if (!mode.isChecked()) {
-                    MarkerOptions markerOptions = new MarkerOptions();
                     try {
                         location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                     } catch (SecurityException e) {
                         markerCountText.setText("no GPS permission");
                     }
-                    LatLng newLatLng = new LatLng(location.getLatitude(), location.getLongitude());             //get GPS lat/long
+                    LatLng newLatLng = new LatLng(location.getLatitude(), location.getLongitude());         //get GPS lat/long
                     markerOptions.position(newLatLng);
-                    coorList.add(newLatLng);
-                    Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).draggable(true));      //create marker
-                    handleMarkers(markerOptions, marker);           //function calculates distances and places marker on map
+                    marker = mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).draggable(true));  //create marker
+
+                    drop.setVisibility(View.GONE);          //switches drop marker to lock marker
+                    setMarker.setVisibility(View.VISIBLE);
                 }
+
+            }
+        });
+
+        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {     //drag
+
+
+            @Override
+            public void onMarkerDragStart(Marker marker) {
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public void onMarkerDragEnd(Marker arg0) {      //set new position when done dragging
+
+                marker = mMap.addMarker(new MarkerOptions().position(new LatLng(arg0.getPosition().latitude, arg0.getPosition().longitude)).draggable(true));
+                LatLng newLatLng = new LatLng(arg0.getPosition().latitude, arg0.getPosition().longitude);
+                markerOptions.position(newLatLng);
+            }
+
+            @Override
+            public void onMarkerDrag(Marker arg0) {
+            }
+        });
+
+        setMarker.setOnClickListener(new View.OnClickListener() {  //lock GPS marker
+            public void onClick(View view) {
+                markerOptionsList.add(markerOptions);
+                handleMarkers(markerOptions, marker);
+
+                LatLng tmp = markerOptions.getPosition();
+                coorList.add(tmp);
+                drop.setVisibility(View.VISIBLE);
+                setMarker.setVisibility(View.GONE);
+
             }
         });
 
@@ -259,7 +304,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     coorList.add(tmp);
                                     if (button) {
                                         handleMarkers(markerOptions, marker);
-
                                     }
                                     button = false;
                                 }
