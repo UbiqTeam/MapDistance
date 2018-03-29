@@ -205,7 +205,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     drop.setVisibility(View.GONE);          //switches drop marker to lock marker
                     setMarker.setVisibility(View.VISIBLE);
-                }
+
+                    mode.setEnabled(false);                 //disable mode switch after gps marker drop, but before locking it
+                }                                           //(causes some issues if user changes mode with un-set marker)
 
             }
         });
@@ -240,6 +242,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 coorList.add(tmp);
                 drop.setVisibility(View.VISIBLE);
                 setMarker.setVisibility(View.GONE);
+                mode.setEnabled(true);
 
             }
         });
