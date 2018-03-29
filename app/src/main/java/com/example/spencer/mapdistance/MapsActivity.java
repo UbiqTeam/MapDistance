@@ -245,6 +245,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 }
                             });
 
+                            mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                                @Override
+                                public boolean onMarkerClick(Marker marker) {
+                                    button = false;
+                                    marker.remove();
+                                    return true;
+                                }
+                            });
+
 
                             setMarker.setOnClickListener(new View.OnClickListener() {
                                 public void onClick(View view) {
