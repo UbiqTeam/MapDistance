@@ -81,7 +81,7 @@
         android:layout_alignBaseline="@+id/modeSwitch"
         android:layout_alignBottom="@+id/modeSwitch"
         android:text="Drop Marker"
-        android:visibility="visible" />
+        android:visibility="gone" />
 
     <Button
         android:id="@+id/setMarkerButton"
@@ -91,7 +91,7 @@
         android:layout_alignBaseline="@+id/modeSwitch"
         android:layout_alignBottom="@+id/modeSwitch"
         android:text="Lock Marker"
-        android:visibility="gone" />
+        android:visibility="visible" />
 
     <Switch
         android:id="@+id/modeSwitch"
