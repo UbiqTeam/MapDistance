@@ -331,7 +331,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 public boolean onMarkerClick(Marker marker) {           //remove a marker
                                     Log.d("manual","remove");  //GPS remove only removes marker not entry
                                     button = false;
-                                    marker.remove();
+                                    marker.remove(); 
                                     setMarker.setEnabled(false);
                                     return true;
                                 }
