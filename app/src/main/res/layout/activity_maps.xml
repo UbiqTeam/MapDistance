@@ -1,20 +1,24 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-
-    >
-<fragment
-    xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/map"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.spencer.mapdistance.MapsActivity"
-    android:layout_centerVertical="true">
+    android:background="@color/BLACK"
+    >
+    <fragment
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="575dp"
+        tools:context="com.example.spencer.mapdistance.MapsActivity"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/drop"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
 
-</fragment>
+    </fragment>
 
     <TextView
         android:id="@+id/markerCountText"
@@ -57,11 +61,14 @@
         style="@android:style/Widget.Button.Inset"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Clear Map"
-        android:visibility="visible"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_below="@+id/map"
+        android:background="@color/colorAccent"
+        android:text="@string/clearMap"
+        android:visibility="visible"
+        tools:text="@string/clearMap" />
 
     <TextView
         android:id="@+id/lengthsText"
@@ -77,42 +84,77 @@
         android:id="@+id/drop"
         style="@android:style/Widget.Button.Inset"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/modeSwitch"
-        android:layout_alignBottom="@+id/modeSwitch"
-        android:text="Drop Marker"
-        android:visibility="gone" />
+        android:layout_height="41dp"
+        android:layout_alignBottom="@+id/toggle"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:background="@color/gps_blue"
+        android:text="@string/dropGPS"
+        android:visibility="invisible"
+        tools:text="@string/dropGPS" />
 
     <Button
         android:id="@+id/setMarkerButton"
         style="@android:style/Widget.Button.Inset"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/modeSwitch"
-        android:layout_alignBottom="@+id/modeSwitch"
-        android:text="Lock Marker"
-        android:visibility="visible" />
-
-    <Switch
-        android:id="@+id/modeSwitch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:switchTextAppearance="@style/TextAppearance.AppCompat.Widget.Button"
-        android:text="GPS Mode"
-        android:layout_alignBaseline="@+id/clearButton"
-        android:layout_alignBottom="@+id/clearButton"
-        android:layout_centerHorizontal="true" />
+        android:layout_height="41dp"
+        android:layout_alignBottom="@+id/toggle"
+        android:background="@color/green"
+        android:text="@string/lock"
+        android:visibility="visible"
+        tools:text="@string/lock" />
 
     <Button
         android:id="@+id/setMarkerGPS"
         style="@android:style/Widget.Button.Inset"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/drop"
+        android:layout_height="41dp"
+        android:layout_alignBottom="@+id/toggle"
+        android:background="@color/green"
+        android:text="@string/lock"
+        android:visibility="gone"
+        tools:text="@string/lock" />
+
+    <RadioGroup
+        android:id="@+id/toggle"
+        android:layout_width="182dp"
+        android:layout_height="30dp"
         android:layout_alignParentBottom="true"
-        android:layout_alignRight="@+id/drop"
-        android:text="Lock Marker"
-        android:visibility="gone" />
+        android:layout_below="@+id/map"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/blue_outline"
+        android:checkedButton="@+id/manToggle"
+        android:orientation="horizontal"
+        android:visibility="visible">
+
+        <RadioButton
+            android:id="@+id/manToggle"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="1dp"
+            android:layout_marginLeft="1dp"
+            android:layout_marginTop="1dp"
+            android:layout_weight="0.90"
+            android:background="@drawable/toggle_background"
+            android:button="@null"
+            android:gravity="center"
+            android:text="Manual"
+            android:textColor="@color/white" />
+
+        <RadioButton
+            android:id="@+id/gpsToggle"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="1dp"
+            android:layout_marginRight="1dp"
+            android:layout_marginTop="1dp"
+            android:layout_weight="0.89"
+            android:background="@drawable/toggle_background"
+            android:button="@null"
+            android:gravity="center"
+            android:text="GPS"
+            android:textColor="@color/white" />
+    </RadioGroup>
 
 
 </RelativeLayout>
