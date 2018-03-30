@@ -54,7 +54,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     final List<LatLng> coorList = new ArrayList<>();                    //list of marker coordinates
 
     double totalArea = 1.0;
-    Boolean switchState = true;
     Marker marker = null;
 
     public void handleMarkers(MarkerOptions markerOptions, Marker marker) {             //handles distance between markers, line drawing, and adds marker to the map
@@ -143,6 +142,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mode.setBackgroundColor(Color.LTGRAY);
 
         mode.setChecked(true);
+        setMarker.setEnabled(false);
+        clear.setEnabled(false);
     }
 
 
@@ -171,6 +172,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     drop.setVisibility(View.VISIBLE);
                     setMarker.setVisibility(View.GONE);
                     setMarkerGPS.setVisibility(View.GONE);
+                    clear.setEnabled(true);
 
                     //////////////////////// GPS Mode ///////////////////////////////////
 
@@ -248,89 +250,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 mMap.clear();
                 markers.clear();
+                clear.setEnabled(false);
                 //markerCountText.setText("Marker Count: " + markers.size());
                 //areaText.setText("Area (sq m): ");
+                areaText.setText("");
                 lengthsText.setText(" ");
                 coordinatesText.setText(" ");
                 distances.clear();
                 coorList.clear();
                 totalArea = 1;
-                switchState = mode.isChecked();
                 if (!mode.isChecked()) {
                     Log.d("GPS","clear");
                     drop.setVisibility(View.VISIBLE);          //clear in GPS mode reverts lock to drop
                     setMarkerGPS.setVisibility(View.GONE);
                     setMarker.setVisibility(View.GONE);
+                    clear.setEnabled(true);
                 } else {
                     Log.d("manual","clear");
                     drop.setVisibility(View.GONE);
                     setMarker.setVisibility(View.VISIBLE);
+                    setMarker.setEnabled(false);            //disables setMarker when no marker is on screen
                     setMarkerGPS.setVisibility(View.GONE);
                 }
                 mode.setEnabled(true);
-            }
-        });
-
-        //////////////////////// GPS Mode ///////////////////////////////////
-
-        drop.setOnClickListener(new View.OnClickListener() {                    //drop GPS marker
-
-            public void onClick(View view) {
-                if (!mode.isChecked()) {
-                    try {
-                        location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                    } catch (SecurityException e) {
-                        markerCountText.setText("no GPS permission");
-                    }
-                    Log.d("GPS","drop");
-                    LatLng newLatLng = new LatLng(location.getLatitude(), location.getLongitude());         //get GPS lat/long
-                    markerOptions.position(newLatLng);
-                    marker = mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).draggable(true));  //create marker
-
-                    drop.setVisibility(View.GONE);          //switches drop marker to lock marker
-                    setMarkerGPS.setVisibility(View.VISIBLE);
-
-                    mode.setEnabled(false);                 //disable mode switch after gps marker drop, but before locking it
-                }                                           //(causes some issues if user changes mode with un-set marker)
-
-            }
-        });
-
-        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {     //drag
-
-
-            @Override
-            public void onMarkerDragStart(Marker marker) {
-            }
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public void onMarkerDragEnd(Marker arg0) {      //set new position when done dragging
-                Log.d("GPS","drag");
-                marker = mMap.addMarker(new MarkerOptions().position(new LatLng(arg0.getPosition().latitude, arg0.getPosition().longitude)).draggable(true));
-                LatLng newLatLng = new LatLng(arg0.getPosition().latitude, arg0.getPosition().longitude);
-                markerOptions.position(newLatLng);
-            }
-
-            @Override
-            public void onMarkerDrag(Marker arg0) {
-            }
-        });
-
-        setMarkerGPS.setOnClickListener(new View.OnClickListener() {  //lock GPS marker
-            public void onClick(View view) {
-            if (!mode.isChecked()) {
-                Log.d("GPS", "setMarker");
-                mode.setEnabled(true);
-                markerOptionsList.add(markerOptions);
-                handleMarkers(markerOptions, marker);
-
-                LatLng tmp = markerOptions.getPosition();
-                coorList.add(tmp);
-                drop.setVisibility(View.VISIBLE);
-                setMarkerGPS.setVisibility(View.GONE);
-            }
-
             }
         });
 
@@ -349,6 +291,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             final List<Marker> tmpMarkers = new ArrayList<>();
                             final MarkerOptions markerOptions = new MarkerOptions();
                             mode.setEnabled(false);
+                            setMarker.setEnabled(true);                          //enables setMarker when marker is on screen
+                            clear.setEnabled(false);                             //prevents deleting marker before setting causing bug
                             if (!button) {                                       //prevents onClick input while manipulating marker (issue #1)
                                 markerOptions.position(latLng);
                                 marker = mMap.addMarker(new MarkerOptions().position(new LatLng(latLng.latitude, latLng.longitude)).draggable(true));  //create marker
@@ -385,6 +329,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                                 @Override
                                 public boolean onMarkerClick(Marker marker) {           //remove a marker
+                                    Log.d("manual","remove");  //GPS remove only removes marker not entry
                                     button = false;
                                     marker.remove();
                                     return true;
@@ -401,8 +346,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         markerOptionsList.add(markerOptions);
                                         LatLng tmp = markerOptions.getPosition();
                                         coorList.add(tmp);
-
-                                            handleMarkers(markerOptions, marker);
+                                        setMarker.setEnabled(false);                          //diables setMarker when no marker is on screen
+                                        clear.setEnabled(true);
+                                        handleMarkers(markerOptions, marker);
                                         button = false;
                                     }
 
