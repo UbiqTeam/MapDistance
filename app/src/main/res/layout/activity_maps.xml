@@ -103,6 +103,16 @@
         android:layout_alignBottom="@+id/clearButton"
         android:layout_centerHorizontal="true" />
 
+    <Button
+        android:id="@+id/setMarkerGPS"
+        style="@android:style/Widget.Button.Inset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/drop"
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/drop"
+        android:text="Lock Marker"
+        android:visibility="gone" />
 
 
 </RelativeLayout>
