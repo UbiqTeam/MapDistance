@@ -31,6 +31,7 @@ import java.util.List;
 import java.math.BigDecimal;
 
 
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
     TextView areaText;              //display area
     TextView markerCountText;       //display marker count
@@ -284,7 +285,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 @Override
                 public void onMapClick(final LatLng latLng) {
-
                     if(!button) {                                                //prevent issue #1
                         if (mode.isChecked()) {                                  //if in manual mode
                             Log.d("manual","mapClick");
@@ -332,6 +332,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     Log.d("manual","remove");  //GPS remove only removes marker not entry
                                     button = false;
                                     marker.remove();
+                                    setMarker.setEnabled(false);
                                     return true;
                                 }
                             });
