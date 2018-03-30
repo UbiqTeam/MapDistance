@@ -8,9 +8,9 @@ If app crashes on startup, then be sure that app permissions for storage and loc
 
 ( **NOTE**:  The user can place a mix of markers from either mode to form a quadrilateral)
 
-**To clear the screen**, press the button "Clear Map".
+**To clear the screen**, press the button "Clear Map". This will remove the markers, the square, and the inputs completely.
 
-**After markers are locked**, they can be removed by clicking on them. The point will remain for the square drawing.
+**After markers are locked**, they can be removed by clicking on them. This only removes the marker rendering. The point will remain for the square drawing. To remove a locked marker point, use "clear map".
 
 ### Outputs
 
